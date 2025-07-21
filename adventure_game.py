@@ -2,6 +2,7 @@ import argparse
 import json
 import random
 from pathlib import Path
+from typing import Optional
 
 
 def choose_number(max_value: int) -> int:
@@ -9,7 +10,7 @@ def choose_number(max_value: int) -> int:
     return random.randint(1, max_value)
 
 
-def print_section(name: str, section: dict) -> str | None:
+def print_section(name: str, section: dict) -> Optional[str]:
     """Print details for a game section and return the next section."""
 
     print("#" * 30)
