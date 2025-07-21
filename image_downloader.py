@@ -2,22 +2,40 @@ import argparse
 import concurrent.futures
 from pathlib import Path
 from urllib.request import urlopen
+from typing import Dict, List
 
 
-def download_image(url: str, dest: Path) -> None:
-    """Download a single image to the destination directory."""
+def download_image(key: int, url: str, dest: Path, progress: Dict[int, List[int]]) -> None:
+    """Download a single image to the destination directory with progress tracking."""
     dest.mkdir(parents=True, exist_ok=True)
-    filename = url.split('/')[-1] or 'image'
+    filename = url.split('/')[-1] or f'image_{key}'
     target = dest / filename
     with urlopen(url) as response, open(target, 'wb') as out_file:
-        out_file.write(response.read())
+        size = int(response.getheader('Content-Length', 0))
+        progress[key] = [0, size]
+        bytes_read = 0
+        while True:
+            chunk = response.read(8192)
+            if not chunk:
+                break
+            out_file.write(chunk)
+            bytes_read += len(chunk)
+            progress[key][0] = bytes_read
+            print(f"{filename}: {bytes_read}/{size if size else '?'} bytes", end='\r')
+        progress.pop(key, None)
+    print(f"{filename}: Download complete{' ' * 20}")
 
 
 def main(urls_file: Path, output_dir: Path, workers: int) -> None:
     urls = [line.strip() for line in urls_file.read_text().splitlines() if line.strip()]
+    progress: Dict[int, List[int]] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
-        for url in urls:
-            executor.submit(download_image, url, output_dir)
+        futures = [
+            executor.submit(download_image, i, url, output_dir, progress)
+            for i, url in enumerate(urls)
+        ]
+        for future in futures:
+            future.result()
 
 
 if __name__ == "__main__":
