@@ -19,3 +19,6 @@ python3 image_downloader.py urls.txt downloaded_images
 ```
 
 Use `--workers` to control the number of concurrent downloads.
+If multiple images share a filename, the downloader will append a numerical
+suffix (e.g. `image_1.jpg`) so that all files are saved without overwriting
+each other.

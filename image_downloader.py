@@ -55,13 +55,22 @@ def download_image(
 ) -> None:
     """Download a single image to the destination directory."""
     dest.mkdir(parents=True, exist_ok=True)
-    filename = url.split("/")[-1] or "image"
-    target = dest / filename
+    original_name = url.split("/")[-1] or "image"
+    base, ext = os.path.splitext(original_name)
+    filename = original_name
+    target: Path | None = None
 
     try:
         with urlopen(url) as response:
             size = int(response.headers.get("Content-Length", "0") or 0)
             with lock:
+                name = filename
+                i = 1
+                while name in progress or (dest / name).exists():
+                    name = f"{base}_{i}{ext}"
+                    i += 1
+                filename = name
+                target = dest / filename
                 progress[filename] = [0, size]
                 print_progress(counter[0], total, progress)
 
