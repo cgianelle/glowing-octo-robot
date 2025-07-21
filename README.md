@@ -5,6 +5,10 @@ Codex sandbox
 
 `image_downloader.py` is a simple script that downloads images in parallel.
 
+It now displays a simple progress bar using only the Python standard library.
+The first line shows overall completion, followed by a separator and one line
+per active download with its own bar.
+
 ### Usage
 
 1. Create a text file with one image URL per line.
