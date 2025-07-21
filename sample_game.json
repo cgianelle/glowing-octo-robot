@@ -1,0 +1,51 @@
+{
+    "start": {
+        "name": "Start",
+        "description": "The adventure begins.",
+        "options": [
+            {"option": "Walk to the forest", "description": "Take a stroll among the trees.", "next": "alpha"},
+            {"option": "Visit the village", "description": "See what's going on in the village.", "next": "beta"},
+            {"option": "Rest by the river", "description": "Relax and enjoy the water.", "next": "omega"},
+            {"option": "Give up", "description": "End your adventure early.", "next": "end"}
+        ]
+    },
+    "alpha": {
+        "name": "Forest",
+        "description": "Tall trees surround you.",
+        "max_time": 15,
+        "options": [
+            {"option": "Climb a tree", "next": "alpha"},
+            {"option": "Pick berries", "next": "beta"},
+            {"option": "Follow a trail", "next": "omega"},
+            {"option": "Head back", "next": "end"}
+        ]
+    },
+    "beta": {
+        "name": "Village",
+        "description": "The villagers greet you.",
+        "speed": ["slow", "medium", "fast"],
+        "max_time": 10,
+        "options": [
+            {"option": "Browse the market", "next": "alpha"},
+            {"option": "Talk to the elder", "next": "beta"},
+            {"option": "Help with chores", "next": "omega"},
+            {"option": "Leave the village", "next": "end"}
+        ]
+    },
+    "omega": {
+        "name": "River",
+        "description": "The river flows swiftly.",
+        "intensity": ["light", "medium", "hard"],
+        "count": 6,
+        "options": [
+            {"option": "Skip stones", "next": "alpha"},
+            {"option": "Go fishing", "next": "beta"},
+            {"option": "Take a swim", "next": "omega"},
+            {"option": "Follow the river", "next": "end"}
+        ]
+    },
+    "end": {
+        "name": "End",
+        "description": "Your adventure concludes."
+    }
+}
