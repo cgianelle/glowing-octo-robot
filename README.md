@@ -22,3 +22,20 @@ Use `--workers` to control the number of concurrent downloads.
 If multiple images share a filename, the downloader will append a numerical
 suffix (e.g. `image_1.jpg`) so that all files are saved without overwriting
 each other.
+
+## Adventure Game
+
+`adventure_game.py` is a small command line adventure engine.
+It loads a game description from a JSON file and uses random "dice"
+rolls to determine how long to perform tasks and which option to
+follow next.
+
+### Usage
+
+Run the script with a path to a JSON file:
+
+```bash
+python3 adventure_game.py sample_game.json
+```
+
+A sample game definition is provided in `sample_game.json`.
