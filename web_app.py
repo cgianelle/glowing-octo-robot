@@ -58,6 +58,7 @@ def handle_upload(environ):
 def play_page(environ, params):
     game_name = params.get('game', [''])[0]
     section_name = params.get('section', ['start'])[0]
+    choice_idx = params.get('choice', [None])[0]
     data = load_game(game_name)
     section = data.get(section_name)
     if not section:
@@ -83,7 +84,26 @@ def play_page(environ, params):
         parts.append("<p>The end.</p><p><a href='/'>Back to home</a></p>")
         return render_page("".join(parts))
 
-    chosen = random.choice(options)
+    # If the player has not chosen an option yet, show the list of choices.
+    if choice_idx is None:
+        items = []
+        for idx, opt in enumerate(options):
+            label = html.escape(opt.get('option', f'Option {idx + 1}'))
+            items.append(
+                f"<li><a href='/play?game={game_name}&section={section_name}&choice={idx}'>{label}</a></li>"
+            )
+        parts.append("<ul>" + "\n".join(items) + "</ul>")
+        return render_page("".join(parts))
+
+    # Validate the chosen index.
+    try:
+        idx = int(choice_idx)
+        chosen = options[idx]
+    except (ValueError, IndexError):
+        parts.append("<p>Invalid choice.</p><p><a href='/'>Back to home</a></p>")
+        return render_page("".join(parts))
+
+    # Show the result of the chosen option.
     opt_desc = chosen.get('description')
     if opt_desc:
         parts.append(f"<p>{opt_desc}</p>")
@@ -94,7 +114,7 @@ def play_page(environ, params):
         followup_json = json.dumps(followup)
         body = "".join(parts) + f"""
         <form method='POST' action='/play'>
-            <p>{prompt}</p>
+            <p>{html.escape(prompt)}</p>
             <input type='hidden' name='game' value='{game_name}'/>
             <input type='hidden' name='followup' value='{html.escape(followup_json)}'/>
             <input type='text' name='answer'/>

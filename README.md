@@ -70,6 +70,7 @@ When a `followup` block is provided, the option does not need its own
 
 `web_app.py` provides a minimal web interface using only the Python standard library.
 It lets you upload new game JSON files and play them in the browser.
+Each section displays its available options so you can choose how the story proceeds.
 Run the server with:
 
 ```bash
