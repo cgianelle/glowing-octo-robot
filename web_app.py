@@ -80,7 +80,7 @@ def play_page(environ, params):
 
     options = section.get('options')
     if not options:
-        parts.append("<p>The end.</p>")
+        parts.append("<p>The end.</p><p><a href='/'>Back to home</a></p>")
         return render_page("".join(parts))
 
     chosen = random.choice(options)
@@ -105,7 +105,7 @@ def play_page(environ, params):
 
     next_section = chosen.get('next')
     if not next_section:
-        parts.append("<p>No next section. Game over.</p>")
+        parts.append("<p>No next section. Game over.</p><p><a href='/'>Back to home</a></p>")
         return render_page("".join(parts))
 
     body = "".join(parts) + f"""

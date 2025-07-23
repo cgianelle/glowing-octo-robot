@@ -77,4 +77,5 @@ python3 web_app.py
 ```
 
 Then open `http://localhost:8000` in your browser.  Uploaded games are
-stored in the `games/` directory.
+stored in the `games/` directory. When a game ends, the page includes a
+"Back to home" link so you can return to the list of games.
