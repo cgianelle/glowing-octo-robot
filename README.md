@@ -65,3 +65,18 @@ Example:
 
 When a `followup` block is provided, the option does not need its own
 `next` field because the responses determine the next section.
+
+## Web Interface
+
+`web_app.py` provides a minimal web interface using only the Python standard library.
+It lets you upload new game JSON files and play them in the browser.
+Like the command line version, the web app automatically chooses an option for you at each step of the story.
+Run the server with:
+
+```bash
+python3 web_app.py
+```
+
+Then open `http://localhost:8000` in your browser.  Uploaded games are
+stored in the `games/` directory. When a game ends, the page includes a
+"Back to home" link so you can return to the list of games.
