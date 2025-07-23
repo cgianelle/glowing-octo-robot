@@ -23,8 +23,7 @@
                         "no": "alpha",
                         "default": "end"
                     }
-                },
-                "next": "alpha"
+                }
             },
             {"option": "Pick berries", "next": "beta"},
             {"option": "Follow a trail", "next": "omega"},
@@ -58,8 +57,7 @@
                         "no": "omega",
                         "default": "end"
                     }
-                },
-                "next": "alpha"
+                }
             },
             {"option": "Go fishing", "next": "beta"},
             {"option": "Take a swim", "next": "omega"},

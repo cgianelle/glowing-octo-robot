@@ -62,3 +62,6 @@ Example:
   }
 }
 ```
+
+When a `followup` block is provided, the option does not need its own
+`next` field because the responses determine the next section.
