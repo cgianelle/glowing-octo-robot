@@ -42,8 +42,21 @@ def print_section(name: str, section: dict) -> Optional[str]:
     option_desc = chosen.get("description")
     if option_desc:
         print(f"Description: {option_desc}")
-    input("Press enter when ready to move on\n")
 
+    followup = chosen.get("followup")
+    if followup:
+        prompt = followup.get("prompt", "")
+        answer = input(f"{prompt}\n").strip().lower()
+        responses = followup.get("responses", {})
+        next_section = responses.get(answer)
+        if next_section is None:
+            next_section = responses.get("default")
+        if next_section is None:
+            print("Unrecognized response and no default specified. Exiting.")
+            return None
+        return next_section
+
+    input("Press enter when ready to move on\n")
     return chosen.get("next")
 
 

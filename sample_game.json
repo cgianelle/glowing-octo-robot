@@ -14,7 +14,17 @@
         "description": "Tall trees surround you.",
         "max_time": 15,
         "options": [
-            {"option": "Climb a tree", "next": "alpha"},
+            {
+                "option": "Climb a tree",
+                "followup": {
+                    "prompt": "Did you reach the top? (yes/no)",
+                    "responses": {
+                        "yes": "beta",
+                        "no": "alpha",
+                        "default": "end"
+                    }
+                }
+            },
             {"option": "Pick berries", "next": "beta"},
             {"option": "Follow a trail", "next": "omega"},
             {"option": "Head back", "next": "end"}
@@ -38,7 +48,17 @@
         "intensity": ["light", "medium", "hard"],
         "count": 6,
         "options": [
-            {"option": "Skip stones", "next": "alpha"},
+            {
+                "option": "Skip stones",
+                "followup": {
+                    "prompt": "Did the stone skip? (yes/no)",
+                    "responses": {
+                        "yes": "alpha",
+                        "no": "omega",
+                        "default": "end"
+                    }
+                }
+            },
             {"option": "Go fishing", "next": "beta"},
             {"option": "Take a swim", "next": "omega"},
             {"option": "Follow the river", "next": "end"}

@@ -39,3 +39,29 @@ python3 adventure_game.py sample_game.json
 ```
 
 A sample game definition is provided in `sample_game.json`.
+
+### Branching follow-up options
+
+Options can include a `followup` section to ask the player a question and
+branch based on the response. Each follow-up contains a `prompt` and a
+`responses` mapping from player input to the next section. If the input
+isn't recognized, a `default` entry may specify where to go next.
+
+Example:
+
+```json
+{
+  "option": "Open the door",
+  "followup": {
+    "prompt": "Were you able to open the door? (yes/no)",
+    "responses": {
+      "yes": "alpha",
+      "no": "beta",
+      "default": "end"
+    }
+  }
+}
+```
+
+When a `followup` block is provided, the option does not need its own
+`next` field because the responses determine the next section.
