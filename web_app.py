@@ -2,6 +2,7 @@ import json
 import random
 import cgi
 import html
+import os
 from pathlib import Path
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
@@ -162,6 +163,7 @@ def application(environ, start_response):
 
 
 if __name__ == '__main__':
-    with make_server('', 8000, application) as server:
-        print("Serving on http://localhost:8000")
+    port = int(os.environ.get('PORT', '8000'))
+    with make_server('', port, application) as server:
+        print(f"Serving on http://localhost:{port}")
         server.serve_forever()
