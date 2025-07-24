@@ -10,9 +10,7 @@ value for each section is an object describing the scene, available options and
 other attributes. Gameplay always begins in the section named `"start"`.
 Sections may transfer control to any other section by name.
 
-The minimal game consists of a `start` section with no options, which immediately
-ends the game. Most games will include multiple sections connected through
-options.
+The minimal game consists of a `start` section with no options, which immediately ends the game. Most games will include multiple sections connected through options.
 
 ## Section Fields
 
@@ -46,9 +44,7 @@ Option fields:
 
 ### Follow‑up Blocks
 
-A `followup` block allows the game to ask the player a question and branch based
-on the response. When a `followup` block is present, the option's `next` field is
-typically omitted because the follow-up responses determine the next section.
+A `followup` block allows the game to ask the player a question and branch based on the response. When a `followup` block is present, the option's `next` field is typically omitted because the follow-up responses determine the next section.
 
 The `followup` object contains:
 
@@ -57,9 +53,7 @@ The `followup` object contains:
 | `prompt`    | string          | **Yes**  | Question shown to the player. |
 | `responses` | object<string,string> | **Yes**  | Mapping of user responses to the next section. A `default` entry may be provided for unrecognized input. |
 
-If the player's input does not match any key in `responses`, the `default`
-entry is used. If no `default` is provided and the input is unrecognized, the
-game ends with an error.
+If the player's input does not match any key in `responses`, the `default` entry is used. If no `default` is provided and the input is unrecognized, the game ends with an error.
 
 ## Game Flow
 
@@ -95,4 +89,37 @@ game ends with an error.
 
 This JSON represents the simplest possible adventure: choosing the only option
 transitions from `start` to `end`.
+
+### Follow-up Example
+
+The next snippet demonstrates an option with a `followup` block. The player's
+response decides which section comes next.
+
+```
+{
+  "start": {
+    "name": "Start",
+    "description": "You encounter a door.",
+    "options": [
+      {
+        "option": "Open the door",
+        "followup": {
+          "prompt": "Were you able to open the door? (yes/no)",
+          "responses": {
+            "yes": "open",
+            "no": "locked",
+            "default": "end"
+          }
+        }
+      }
+    ]
+  },
+  "open": {"name": "Open Door"},
+  "locked": {"name": "Locked Door"},
+  "end": {"name": "End"}
+}
+```
+
+When a `followup` block is present, the option omits `next` because the
+`responses` mapping specifies the next section for each answer.
 
