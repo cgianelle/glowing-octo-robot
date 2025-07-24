@@ -20,8 +20,8 @@ A section object may contain the following fields:
 
 | Field       | Type          | Description |
 |-------------|---------------|-------------|
-| `name`      | string        | Optional display name. Defaults to the section key. |
-| `description` | string      | Text shown to the player when the section is entered. |
+| `name`      | string        | Required display name for the section. |
+| `description` | string      | Optional text shown when the section is entered. |
 | `max_time`  | number        | If present, a random integer from `1` to `max_time` is generated and displayed as the time spent in this section. |
 | `speed`     | array<string> | List of possible speed values. One is chosen at random and displayed. |
 | `intensity` | array<string> | List of possible intensity values. One is chosen at random and displayed. |
