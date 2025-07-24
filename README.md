@@ -80,3 +80,27 @@ python3 web_app.py
 Then open `http://localhost:8000` in your browser.  Uploaded games are
 stored in the `games/` directory. When a game ends, the page includes a
 "Back to home" link so you can return to the list of games.
+
+## Deploying on Cloud Run
+
+To run the web app on [Google Cloud Run](https://cloud.google.com/run), build
+a container image and deploy it using the `gcloud` CLI.
+
+1. Build and push the image (replace `PROJECT_ID` with your project):
+
+   ```bash
+   gcloud builds submit --tag gcr.io/PROJECT_ID/adventure-game .
+   ```
+
+2. Deploy the service:
+
+   ```bash
+   gcloud run deploy adventure-game \
+       --image gcr.io/PROJECT_ID/adventure-game \
+       --platform managed --region REGION --allow-unauthenticated
+   ```
+
+Cloud Run sets the `PORT` environment variable automatically. The included
+`Dockerfile` starts the app with Gunicorn listening on that port. After the
+deployment finishes, the command output shows the service URL where you can
+play the game online.
