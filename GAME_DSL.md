@@ -18,15 +18,15 @@ options.
 
 A section object may contain the following fields:
 
-| Field       | Type          | Description |
-|-------------|---------------|-------------|
-| `name`      | string        | Required display name for the section. |
-| `description` | string      | Optional text shown when the section is entered. |
-| `max_time`  | number        | If present, a random integer from `1` to `max_time` is generated and displayed as the time spent in this section. |
-| `speed`     | array<string> | List of possible speed values. One is chosen at random and displayed. |
-| `intensity` | array<string> | List of possible intensity values. One is chosen at random and displayed. |
-| `count`     | number        | Maximum count. A random integer from `1` to `count` is chosen and displayed. |
-| `options`   | array<object> | List of options that can be selected from this section. If omitted or empty, the section ends the game. |
+| Field       | Type          | Required | Description |
+|-------------|---------------|----------|-------------|
+| `name`      | string        | **Yes**  | Display name for the section. |
+| `description` | string      | No       | Text shown when the section is entered. |
+| `max_time`  | number        | No       | If present, a random integer from `1` to `max_time` is generated and displayed as the time spent in this section. |
+| `speed`     | array<string> | No       | List of possible speed values. One is chosen at random and displayed. |
+| `intensity` | array<string> | No       | List of possible intensity values. One is chosen at random and displayed. |
+| `count`     | number        | No       | Maximum count. A random integer from `1` to `count` is chosen and displayed. |
+| `options`   | array<object> | No       | Options selectable from this section. If omitted or empty, the section ends the game. |
 
 ### Options
 
@@ -35,12 +35,14 @@ and web versions randomly pick one option when a section is processed.
 
 Option fields:
 
-| Field        | Type   | Description |
-|--------------|--------|-------------|
-| `option`     | string | Name of the option, shown to the player. |
-| `description`| string | Optional text describing the outcome when the option is chosen. |
-| `next`       | string | Name of the next section. Omit when using a `followup` block. |
-| `followup`   | object | Optional follow-up prompt. See below. |
+| Field        | Type   | Required | Description |
+|--------------|--------|----------|-------------|
+| `option`     | string | **Yes**  | Name of the option, shown to the player. |
+| `description`| string | No       | Text describing the outcome when the option is chosen. |
+| `next`       | string | Yes*     | Name of the next section. Omit when using a `followup` block. |
+| `followup`   | object | No       | Follow-up prompt. See below. |
+
+`*` `next` is required unless a `followup` block is provided.
 
 ### Follow‑up Blocks
 
@@ -50,10 +52,10 @@ typically omitted because the follow-up responses determine the next section.
 
 The `followup` object contains:
 
-| Field       | Type            | Description |
-|-------------|-----------------|-------------|
-| `prompt`    | string          | Text of the question shown to the player. |
-| `responses` | object<string,string> | Mapping of user responses to the name of the next section. A `default` entry may be provided for unrecognized input. |
+| Field       | Type            | Required | Description |
+|-------------|-----------------|----------|-------------|
+| `prompt`    | string          | **Yes**  | Question shown to the player. |
+| `responses` | object<string,string> | **Yes**  | Mapping of user responses to the next section. A `default` entry may be provided for unrecognized input. |
 
 If the player's input does not match any key in `responses`, the `default`
 entry is used. If no `default` is provided and the input is unrecognized, the
