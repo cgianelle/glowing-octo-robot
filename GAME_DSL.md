@@ -114,8 +114,20 @@ response decides which section comes next.
       }
     ]
   },
-  "open": {"name": "Open Door"},
-  "locked": {"name": "Locked Door"},
+  "open": {
+    "name": "Open Door",
+    "description": "The door opens easily.",
+    "options": [
+      {"option": "Continue", "next": "end"}
+    ]
+  },
+  "locked": {
+    "name": "Locked Door",
+    "description": "It's locked tight.",
+    "options": [
+      {"option": "Give up", "next": "end"}
+    ]
+  },
   "end": {"name": "End"}
 }
 ```
