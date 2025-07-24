@@ -86,17 +86,25 @@ stored in the `games/` directory. When a game ends, the page includes a
 To run the web app on [Google Cloud Run](https://cloud.google.com/run), build
 a container image and deploy it using the `gcloud` CLI.
 
-1. Build and push the image (replace `PROJECT_ID` with your project):
+1. Build and push the image using [Artifact Registry](https://cloud.google.com/artifact-registry). Create a Docker repository if you don't already have one:
 
    ```bash
-   gcloud builds submit --tag gcr.io/PROJECT_ID/adventure-game .
+   gcloud artifacts repositories create adventure-repo \
+       --repository-format=docker --location=REGION
+   ```
+
+   Then build and push the container (replace `PROJECT_ID` and `REGION` with your values):
+
+   ```bash
+   gcloud builds submit \
+       --tag REGION-docker.pkg.dev/PROJECT_ID/adventure-repo/adventure-game .
    ```
 
 2. Deploy the service:
 
    ```bash
    gcloud run deploy adventure-game \
-       --image gcr.io/PROJECT_ID/adventure-game \
+       --image REGION-docker.pkg.dev/PROJECT_ID/adventure-repo/adventure-game \
        --platform managed --region REGION --allow-unauthenticated
    ```
 
