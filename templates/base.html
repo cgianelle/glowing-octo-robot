@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        header {
+            margin-bottom: 2em;
+        }
+        nav a {
+            margin-right: 1em;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin-bottom: 0.5em;
+        }
+        form {
+            margin-top: 1em;
+        }
+        button {
+            padding: 0.5em 1em;
+            font-size: 1em;
+        }
+    </style>
+</head>
+<body>
+<header>
+    <h1>{{ title }}</h1>
+    <nav>
+        <a href="/">Home</a>
+    </nav>
+</header>
+{% block content %}{% endblock %}
+</body>
+</html>
