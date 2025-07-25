@@ -1,6 +1,8 @@
 import json
 import random
 import cgi
+from email.parser import BytesParser
+from email import policy
 import html
 import os
 from pathlib import Path
@@ -44,12 +46,37 @@ def index_page():
 
 
 def handle_upload(environ):
-    form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ,
-                            keep_blank_values=True)
-    file_item = form['file']
-    if file_item.filename:
-        dest = GAMES_DIR / Path(file_item.filename).name
-        dest.write_bytes(file_item.file.read())
+    """Parse a multipart/form-data upload without using cgi.FieldStorage."""
+    ctype, pdict = cgi.parse_header(environ.get('CONTENT_TYPE', ''))
+    if ctype != 'multipart/form-data':
+        return render_page("<p>Invalid form data.</p><a href='/'>Back to home</a>")
+
+    try:
+        size = int(environ.get('CONTENT_LENGTH', 0))
+    except ValueError:
+        size = 0
+    body_bytes = environ['wsgi.input'].read(size)
+
+    # Build a minimal email message so BytesParser can handle the parts
+    header = f"Content-Type: {ctype}; boundary={pdict.get('boundary')}\n"
+    header += "MIME-Version: 1.0\n\n"
+    msg = BytesParser(policy=policy.default).parsebytes(
+        header.encode() + body_bytes
+    )
+
+    uploaded = None
+    filename = None
+    for part in msg.iter_parts():
+        disposition = part.get('Content-Disposition', '')
+        disp_type, disp_params = cgi.parse_header(disposition)
+        if disp_type == 'form-data' and disp_params.get('name') == 'file':
+            filename = disp_params.get('filename')
+            uploaded = part.get_payload(decode=True)
+            break
+
+    if filename and uploaded is not None:
+        dest = GAMES_DIR / Path(filename).name
+        dest.write_bytes(uploaded)
         body = "<p>Upload successful.</p><a href='/'>Back to home</a>"
     else:
         body = "<p>No file uploaded.</p><a href='/'>Back to home</a>"
