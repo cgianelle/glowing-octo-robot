@@ -44,7 +44,12 @@ def index_page():
 
 
 def parse_multipart(environ):
-    """Parse multipart/form-data from a WSGI environ."""
+    """Parse multipart/form-data from a WSGI environ.
+
+    Returns a mapping of field name to a dict with optional ``filename`` and
+    ``content`` keys. Only the request body is read, so callers should not read
+    from ``wsgi.input`` afterwards.
+    """
     content_type = environ.get('CONTENT_TYPE', '')
     if not content_type.startswith('multipart/form-data'):
         return {}

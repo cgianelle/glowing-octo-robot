@@ -69,7 +69,8 @@ When a `followup` block is provided, the option does not need its own
 ## Web Interface
 
 `web_app.py` provides a simple web interface. It now uses the Jinja2 template
-engine and some basic CSS for styling.
+engine and some basic CSS for styling. File uploads are handled with a
+lightweight multipart parser instead of the deprecated `cgi` module.
 It lets you upload new game JSON files and play them in the browser.
 Like the command line version, the web app automatically chooses an option for you at each step of the story.
 Run the server with:
