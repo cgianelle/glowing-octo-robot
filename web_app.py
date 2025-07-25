@@ -1,6 +1,7 @@
 import json
 import random
-import cgi
+from email.parser import BytesParser
+from email.policy import default
 import os
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -42,13 +43,38 @@ def index_page():
     return render_template("index.html", title="Adventure Games", games=games)
 
 
+def parse_multipart(environ):
+    """Parse multipart/form-data from a WSGI environ."""
+    content_type = environ.get('CONTENT_TYPE', '')
+    if not content_type.startswith('multipart/form-data'):
+        return {}
+
+    content_length = int(environ.get('CONTENT_LENGTH', 0))
+    body = environ['wsgi.input'].read(content_length)
+
+    parser = BytesParser(policy=default)
+    message = parser.parsebytes(
+        f"Content-Type: {content_type}\r\n\r\n".encode() + body
+    )
+
+    form = {}
+    for part in message.iter_parts():
+        name = part.get_param('name', header='content-disposition')
+        if not name:
+            continue
+        form[name] = {
+            'filename': part.get_filename(),
+            'content': part.get_payload(decode=True),
+        }
+    return form
+
+
 def handle_upload(environ):
-    form = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ,
-                            keep_blank_values=True)
-    file_item = form['file']
-    if file_item.filename:
-        dest = GAMES_DIR / Path(file_item.filename).name
-        dest.write_bytes(file_item.file.read())
+    form = parse_multipart(environ)
+    file_item = form.get('file')
+    if file_item and file_item.get('filename'):
+        dest = GAMES_DIR / Path(file_item['filename']).name
+        dest.write_bytes(file_item['content'])
         message = "Upload successful."
     else:
         message = "No file uploaded."

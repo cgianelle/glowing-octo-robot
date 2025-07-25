@@ -68,7 +68,8 @@ When a `followup` block is provided, the option does not need its own
 
 ## Web Interface
 
-`web_app.py` provides a minimal web interface using only the Python standard library.
+`web_app.py` provides a simple web interface. It now uses the Jinja2 template
+engine and some basic CSS for styling.
 It lets you upload new game JSON files and play them in the browser.
 Like the command line version, the web app automatically chooses an option for you at each step of the story.
 Run the server with:
