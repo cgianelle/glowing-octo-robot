@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block content %}
+<section>
+    <h2>{{ section.name or section_name }}</h2>
+    {% if section.description %}
+    <p>{{ section.description }}</p>
+    {% endif %}
+    {% if time %}
+    <p>max_time: {{ time }} minutes</p>
+    {% endif %}
+    {% if speed %}
+    <p>speed: {{ speed }}</p>
+    {% endif %}
+    {% if intensity %}
+    <p>intensity: {{ intensity }}</p>
+    {% endif %}
+    {% if count %}
+    <p>count: {{ count }}</p>
+    {% endif %}
+    {% if chosen_option %}
+    <p>Option: {{ chosen_option }}</p>
+    {% endif %}
+    {% if option_description %}
+    <p>{{ option_description }}</p>
+    {% endif %}
+    {% if followup %}
+    <form method="POST" action="/play">
+        <p>{{ followup.prompt }}</p>
+        <input type="hidden" name="game" value="{{ game }}"/>
+        <input type="hidden" name="followup" value="{{ followup_json|e }}"/>
+        <input type="text" name="answer"/>
+        <button type="submit">Submit</button>
+    </form>
+    {% elif next_section %}
+    <a href="/play?game={{ game }}&section={{ next_section }}">Continue</a>
+    {% elif end %}
+    <p>The end.</p>
+    <p><a href="/">Back to home</a></p>
+    {% else %}
+    <p>No next section. Game over.</p>
+    <p><a href="/">Back to home</a></p>
+    {% endif %}
+</section>
+{% endblock %}
