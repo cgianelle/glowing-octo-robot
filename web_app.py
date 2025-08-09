@@ -2,6 +2,7 @@ import json
 import random
 from email.parser import BytesParser
 from email.policy import default
+
 import os
 from pathlib import Path
 from urllib.parse import parse_qs
@@ -69,6 +70,38 @@ def parse_multipart(environ):
             continue
         form[name] = {
             'filename': part.get_filename(),
+            'content': part.get_payload(decode=True),
+        }
+    return form
+
+
+def parse_multipart(environ):
+    """Parse multipart/form-data from a WSGI environ.
+
+    Returns a mapping of field name to a dict with optional 'filename' and
+    'content' keys. Only the request body is read; callers should not read
+    from ``wsgi.input`` afterwards.
+    """
+    content_type = environ.get('CONTENT_TYPE', '')
+    if not content_type.startswith('multipart/form-data'):
+        return {}
+
+    content_length = int(environ.get('CONTENT_LENGTH', 0))
+    body = environ['wsgi.input'].read(content_length)
+
+    parser = BytesParser(policy=default)
+    message = parser.parsebytes(
+        f"Content-Type: {content_type}\r\n\r\n".encode() + body
+    )
+
+    form = {}
+    for part in message.iter_parts():
+        name = part.get_param('name', header='content-disposition')
+        if not name:
+            continue
+        filename = part.get_filename()
+        form[name] = {
+            'filename': filename,
             'content': part.get_payload(decode=True),
         }
     return form
