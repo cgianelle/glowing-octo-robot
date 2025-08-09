@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<ul>
+{% for game in games %}
+  <li><a href="/play?game={{ game }}">Play {{ game }}</a></li>
+{% else %}
+  <li>No games uploaded</li>
+{% endfor %}
+</ul>
+<h2>Upload New Game</h2>
+<form method="POST" action="/upload" enctype="multipart/form-data">
+    <input type="file" name="file"/>
+    <button type="submit">Upload</button>
+</form>
+{% endblock %}

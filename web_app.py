@@ -2,14 +2,21 @@ import json
 import random
 from email.parser import BytesParser
 from email.policy import default
-import html
+
 import os
 from pathlib import Path
 from urllib.parse import parse_qs
 from wsgiref.simple_server import make_server
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 GAMES_DIR = Path(__file__).parent / "games"
 GAMES_DIR.mkdir(exist_ok=True)
+
+TEMPLATES_DIR = Path(__file__).parent / "templates"
+env = Environment(
+    loader=FileSystemLoader(TEMPLATES_DIR),
+    autoescape=select_autoescape(["html", "xml"]),
+)
 
 
 def choose_number(max_value: int) -> int:
@@ -27,21 +34,45 @@ def render_page(body: str, status: str = "200 OK", headers=None):
     return status, headers, body.encode("utf-8")
 
 
+def render_template(template: str, status: str = "200 OK", headers=None, **context):
+    body = env.get_template(template).render(**context)
+    return render_page(body, status, headers)
+
+
 def index_page():
-    items = []
-    for p in GAMES_DIR.glob("*.json"):
-        items.append(f"<li><a href='/play?game={p.name}'>Play {p.name}</a></li>")
-    games_list = "\n".join(items) or "<li>No games uploaded</li>"
-    body = f"""
-    <h1>Adventure Games</h1>
-    <ul>{games_list}</ul>
-    <h2>Upload New Game</h2>
-    <form method='POST' action='/upload' enctype='multipart/form-data'>
-        <input type='file' name='file'/>
-        <button type='submit'>Upload</button>
-    </form>
+    games = [p.name for p in GAMES_DIR.glob("*.json")]
+    return render_template("index.html", title="Adventure Games", games=games)
+
+
+def parse_multipart(environ):
+    """Parse multipart/form-data from a WSGI environ.
+
+    Returns a mapping of field name to a dict with optional ``filename`` and
+    ``content`` keys. Only the request body is read, so callers should not read
+    from ``wsgi.input`` afterwards.
     """
-    return render_page(body)
+    content_type = environ.get('CONTENT_TYPE', '')
+    if not content_type.startswith('multipart/form-data'):
+        return {}
+
+    content_length = int(environ.get('CONTENT_LENGTH', 0))
+    body = environ['wsgi.input'].read(content_length)
+
+    parser = BytesParser(policy=default)
+    message = parser.parsebytes(
+        f"Content-Type: {content_type}\r\n\r\n".encode() + body
+    )
+
+    form = {}
+    for part in message.iter_parts():
+        name = part.get_param('name', header='content-disposition')
+        if not name:
+            continue
+        form[name] = {
+            'filename': part.get_filename(),
+            'content': part.get_payload(decode=True),
+        }
+    return form
 
 
 def parse_multipart(environ):
@@ -82,10 +113,15 @@ def handle_upload(environ):
     if file_item and file_item.get('filename'):
         dest = GAMES_DIR / Path(file_item['filename']).name
         dest.write_bytes(file_item['content'])
-        body = "<p>Upload successful.</p><a href='/'>Back to home</a>"
+        message = "Upload successful."
     else:
-        body = "<p>No file uploaded.</p><a href='/'>Back to home</a>"
-    return render_page(body)
+        message = "No file uploaded."
+    return render_template(
+        "message.html",
+        title="Upload",
+        message=message,
+        home_link=True,
+    )
 
 
 def play_page(environ, params):
@@ -94,63 +130,46 @@ def play_page(environ, params):
     data = load_game(game_name)
     section = data.get(section_name)
     if not section:
-        return render_page("<p>Section not found.</p>")
+        return render_template(
+            "message.html",
+            title="Error",
+            message="Section not found.",
+            home_link=True,
+        )
 
-    parts = ["<h2>{}</h2>".format(section.get('name', section_name))]
-    desc = section.get('description')
-    if desc:
-        parts.append(f"<p>{desc}</p>")
+    context = {
+        "title": section.get("name", section_name),
+        "section": section,
+        "section_name": section_name,
+        "game": game_name,
+        "time": choose_number(int(section["max_time"])) if "max_time" in section else None,
+        "speed": random.choice(section["speed"]) if "speed" in section else None,
+        "intensity": random.choice(section["intensity"]) if "intensity" in section else None,
+        "count": choose_number(int(section["count"])) if "count" in section else None,
+    }
 
-    if 'max_time' in section:
-        time_val = choose_number(int(section['max_time']))
-        parts.append(f"<p>max_time: {time_val} minutes</p>")
-    if 'speed' in section:
-        parts.append(f"<p>speed: {random.choice(section['speed'])}</p>")
-    if 'intensity' in section:
-        parts.append(f"<p>intensity: {random.choice(section['intensity'])}</p>")
-    if 'count' in section:
-        parts.append(f"<p>count: {choose_number(int(section['count']))}</p>")
-
-    options = section.get('options')
+    options = section.get("options")
     if not options:
-        parts.append("<p>The end.</p><p><a href='/'>Back to home</a></p>")
-        return render_page("".join(parts))
+        context["end"] = True
+        return render_template("play.html", **context)
 
-    # Randomly select an option like the command line version.
     chosen = random.choice(options)
-    opt_name = chosen.get('option')
-    if opt_name:
-        parts.append(f"<p>Option: {html.escape(opt_name)}</p>")
+    context["chosen_option"] = chosen.get("option")
+    context["option_description"] = chosen.get("description")
 
-    # Show the result of the chosen option.
-    opt_desc = chosen.get('description')
-    if opt_desc:
-        parts.append(f"<p>{opt_desc}</p>")
-
-    followup = chosen.get('followup')
+    followup = chosen.get("followup")
     if followup:
-        prompt = followup.get('prompt', '')
-        followup_json = json.dumps(followup)
-        body = "".join(parts) + f"""
-        <form method='POST' action='/play'>
-            <p>{html.escape(prompt)}</p>
-            <input type='hidden' name='game' value='{game_name}'/>
-            <input type='hidden' name='followup' value='{html.escape(followup_json)}'/>
-            <input type='text' name='answer'/>
-            <button type='submit'>Submit</button>
-        </form>
-        """
-        return render_page(body)
+        context["followup"] = followup
+        context["followup_json"] = json.dumps(followup)
+        return render_template("play.html", **context)
 
-    next_section = chosen.get('next')
+    next_section = chosen.get("next")
     if not next_section:
-        parts.append("<p>No next section. Game over.</p><p><a href='/'>Back to home</a></p>")
-        return render_page("".join(parts))
+        context["next_section"] = None
+        return render_template("play.html", **context)
 
-    body = "".join(parts) + f"""
-    <a href='/play?game={game_name}&section={next_section}'>Continue</a>
-    """
-    return render_page(body)
+    context["next_section"] = next_section
+    return render_template("play.html", **context)
 
 
 def handle_followup(params):
@@ -160,11 +179,21 @@ def handle_followup(params):
     try:
         followup = json.loads(followup_json)
     except json.JSONDecodeError:
-        return render_page("<p>Error reading followup.</p>")
+        return render_template(
+            "message.html",
+            title="Error",
+            message="Error reading followup.",
+            home_link=True,
+        )
     responses = followup.get('responses', {})
     next_section = responses.get(answer) or responses.get('default')
     if not next_section:
-        return render_page("<p>Unrecognized response and no default specified.</p>")
+        return render_template(
+            "message.html",
+            title="Error",
+            message="Unrecognized response and no default specified.",
+            home_link=True,
+        )
     headers = [('Location', f'/play?game={game_name}&section={next_section}')]
     return '303 See Other', headers, b''
 
